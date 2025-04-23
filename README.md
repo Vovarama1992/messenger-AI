@@ -48,4 +48,5 @@ TypeScript, tsconfig-paths, монорепа
 🚀 Как запустить
 git clone ...
 cd myGoogle
+cp .env.example .env
 docker-compose up --build
