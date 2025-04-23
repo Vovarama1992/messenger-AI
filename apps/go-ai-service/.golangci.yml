@@ -1,0 +1,36 @@
+run:
+  timeout: 5m
+
+issues:
+  exclude-use-default: false
+  exclude-dirs:
+    - node_modules
+    - dist
+  exclude-files:
+    - ".*\\.gen\\.go"
+
+linters:
+  enable:
+    - govet
+    - gofmt
+    - goimports
+    - unused
+    - staticcheck
+    - errcheck
+    - whitespace
+    - revive
+    - nolintlint
+
+linters-settings:
+  gofmt:
+    simplify: true
+
+  revive:
+    severity: warning
+    rules:
+      - name: indent-error-flow
+      - name: var-naming
+      - name: blank-imports
+      - name: import-shadowing
+      - name: line-length-limit
+        arguments: [120]

@@ -1,0 +1,152 @@
+version: '3.8'
+
+services:
+  # Основной REST API (NestJS без WebSocket)
+  backend:
+    build: ./apps/backend
+    container_name: messenger_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - kafka
+    networks:
+      - messenger_network
+
+  # WebSocket Gateway 1
+  ws_gateway_1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ws_gateway_1
+    restart: always
+    command: npm run start:ws1
+    ports:
+      - "4001:4001"
+    environment:
+      - WS_PORT=4001
+    env_file:
+      - .env
+    depends_on:
+      - kafka
+    networks:
+      - messenger_network
+
+  # WebSocket Gateway 2
+  ws_gateway_2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ws_gateway_2
+    restart: always
+    command: npm run start:ws2
+    ports:
+      - "4002:4002"
+    environment:
+      - WS_PORT=4002
+    env_file:
+      - .env
+    depends_on:
+      - kafka
+    networks:
+      - messenger_network
+
+        # WebSocket AI AutoReply Gateway
+  ws_gateway_ai_auto:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ws_gateway_ai_auto
+    restart: always
+    command: npm run start:ws-auto
+    ports:
+      - "4003:4003"
+    environment:
+      - WS_PORT=4003
+    env_file:
+      - .env
+    depends_on:
+      - kafka
+    networks:
+      - messenger_network
+
+  # WebSocket AI Advisor Gateway
+  ws_gateway_ai_advice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ws_gateway_ai_advice
+    restart: always
+    command: npm run start:ws-advice
+    ports:
+      - "4004:4004"
+    environment:
+      - WS_PORT=4004
+    env_file:
+      - .env
+    depends_on:
+      - kafka
+    networks:
+      - messenger_network
+
+  # PostgreSQL
+  db:
+    image: postgres:15
+    container_name: messenger_db
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - messenger_network
+
+  # Kafka + Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: messenger_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - messenger_network
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: messenger_kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - messenger_network
+
+  # Go AI Service
+  go_ai_service:
+    build:
+      context: ./go-ai-service
+      dockerfile: Dockerfile
+    container_name: messenger_go_ai_service
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - kafka
+    networks:
+      - messenger_network
+
+networks:
+  messenger_network:
+    driver: bridge
+
+volumes:
+  db_data:
