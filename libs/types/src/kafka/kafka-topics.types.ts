@@ -6,6 +6,7 @@ export type KafkaTopics = {
 
   'chat.message.ai.advice-request': {
     chatId: number;
+    senderId: number;
     targetUserId: number;
     sourceText: string;
     customPrompt?: string;

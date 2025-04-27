@@ -69,3 +69,13 @@ func (p *PostgresService) EnsureThreadId(userId int, chatId int) (string, error)
 
 	return thread.ID, nil
 }
+
+func (p *PostgresService) GetUserName(userId int) (string, error) {
+	var firstName string
+	err := p.pool.QueryRow(context.Background(),
+		"SELECT name FROM public.\"User\" WHERE id = $1", userId).Scan(&firstName)
+	if err != nil {
+		return "", err
+	}
+	return firstName, nil
+}

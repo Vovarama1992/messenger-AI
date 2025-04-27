@@ -73,6 +73,7 @@ export class WebSocketGateway1 implements OnModuleInit {
         await this.kafkaService.sendMessage('chat.message.ai.advice-request', {
           chatId: data.chatId,
           sourceText: data.text,
+          senderId: data.senderId,
           targetUserId: binding.userId,
           customPrompt: binding.customPrompt || undefined,
         });

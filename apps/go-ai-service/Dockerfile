@@ -1,4 +1,6 @@
-# Стадия сборки
+# ========================
+# Build stage
+# ========================
 FROM golang:1.22 AS builder
 
 WORKDIR /app
@@ -7,17 +9,20 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o go-ai-service main.go
 
-# Финальный образ
-FROM debian:bullseye-slim
+RUN go build -o go-ai-service -trimpath -ldflags="-s -w" main.go
+
+# ========================
+# Final stage
+# ========================
+FROM gcr.io/distroless/static:nonroot
 
 WORKDIR /app
+
 COPY --from=builder /app/go-ai-service .
 
-# Для доступа к .env, если нужен
-COPY .env .
+EXPOSE 8080
 
-ENV GIN_MODE=release
+USER nonroot:nonroot
 
-CMD ["./go-ai-service"]
+ENTRYPOINT ["/app/go-ai-service"]

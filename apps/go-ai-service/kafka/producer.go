@@ -6,10 +6,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/Vovarama1992/go-ai-service/pkg/types"
 	"github.com/segmentio/kafka-go"
 )
 
-func SendAdvice(msg AiAdviceResponse) {
+func SendAdvice(msg types.AiAdviceResponse) {
 	broker := os.Getenv("KAFKA_BROKER")
 	if broker == "" {
 		broker = "kafka:9092"
@@ -38,7 +39,7 @@ func SendAdvice(msg AiAdviceResponse) {
 	}
 }
 
-func SendAutoreply(msg AiAutoreplyRequest) {
+func SendAutoreply(msg types.AiAutoreplyResponse) {
 	broker := os.Getenv("KAFKA_BROKER")
 	if broker == "" {
 		broker = "kafka:9092"
